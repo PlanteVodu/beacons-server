@@ -57,7 +57,7 @@ class DB:
 
     def __init__(self, db_path):
         """Initialize the connection with the SQLite data base file."""
-        self.conn = self.create_connection(db_path)
+        self.conn = self._create_connection(db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.text_factory = str
         self.SILENT = False
@@ -68,8 +68,8 @@ class DB:
         self.conn.close()
 
 
-    def create_connection(self, path):
-        """Create a database connection to a SQLite database """
+    def _create_connection(self, path):
+        """Create a database connection to a SQLite database."""
         try:
             conn = sqlite3.connect(path)
             return conn
@@ -135,15 +135,15 @@ class DB:
     def select_table(self, table, orderBy='', **kwargs):
         """Apply a SELECT request on a table. It can specify an AND
         condition using named arguments and an ORDER BY."""
-        where = self.format_and_condition(**kwargs)
-        orderBy = self.format_order_by(orderBy)
+        where = self._format_and_condition(**kwargs)
+        orderBy = self._format_order_by(orderBy)
 
         sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
 
         return self.select(sql, list(kwargs.values()))
 
 
-    def format_and_condition(self, **kwargs):
+    def _format_and_condition(self, **kwargs):
         """Return a WHERE condition with every named argument received
         using an AND condition."""
         if len(kwargs) == 0:
@@ -155,7 +155,7 @@ class DB:
         return where
 
 
-    def format_order_by(self, orderBy=''):
+    def _format_order_by(self, orderBy=''):
         """Return an ORDER BY formated with either a string or a list."""
         if len(orderBy) == 0:
             return ''

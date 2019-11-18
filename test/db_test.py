@@ -26,16 +26,16 @@ class DBTest(unittest.TestCase):
 
 
     def test_format_and_condition(self):
-        self.assertEqual(self.db.format_and_condition(), '')
-        self.assertEqual(self.db.format_and_condition(id=2, name='John'),
+        self.assertEqual(self.db._format_and_condition(), '')
+        self.assertEqual(self.db._format_and_condition(id=2, name='John'),
                          'WHERE id = ? AND name = ?')
 
 
     def test_format_order_by(self):
-        self.assertEqual(self.db.format_order_by(''), '')
-        self.assertEqual(self.db.format_order_by('position'),
+        self.assertEqual(self.db._format_order_by(''), '')
+        self.assertEqual(self.db._format_order_by('position'),
                          'ORDER BY position')
-        self.assertEqual(self.db.format_order_by(['id', 'position']),
+        self.assertEqual(self.db._format_order_by(['id', 'position']),
                          'ORDER BY id, position')
 
 
