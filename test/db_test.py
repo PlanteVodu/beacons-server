@@ -42,4 +42,4 @@ class DBTest(unittest.TestCase):
     def test_select_table(self):
         self.db.insert_object('bookmark', {'name':'John'})
         self.assertEqual(self.db.select_table('bookmark', name='Doe'), [])
-        # self.assertEqual(self.db.select_table('bookmark', name='John'), {'name':'John'})
+        self.assertEqual(len(self.db.select_table('bookmark', name='John')), 1)
