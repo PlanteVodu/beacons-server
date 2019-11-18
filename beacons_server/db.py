@@ -11,7 +11,6 @@ class DB:
 
     # Describe the structure of the data base objects
     OBJ_TYPES = ['slide', 'row', 'column', 'box', 'bookmark']
-    SUBOBJ_FIELDS = ['rows', 'columns', 'boxes', 'bookmarks']
     SQL_TABLES = {
         'slide': """CREATE TABLE IF NOT EXISTS slide (
             id integer PRIMARY KEY,
