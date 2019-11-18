@@ -55,6 +55,7 @@ class DB:
 
 
     def __init__(self, db_path):
+        """Initialize the connection with the SQLite data base file."""
         self.conn = self.create_connection(db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.text_factory = str
@@ -62,6 +63,7 @@ class DB:
 
 
     def __del__(self):
+        """End the SQLite data base connection."""
         self.conn.close()
 
 
@@ -103,7 +105,8 @@ class DB:
 
 
     def insert_object(self, table, obj):
-        """Insert an object represented as a dictionnary inside a table."""
+        """Insert an object represented as a dictionnary inside a table.
+        Return the id of the row created."""
         if len(list(obj.values())) == 0:
             sql = 'INSERT INTO %s DEFAULT VALUES' % table
             values = None
@@ -120,7 +123,8 @@ class DB:
 
 
     def select(self, sql, obj=None):
-        """Retrieve objects and return them as a list of dictionnaries."""
+        """Execute an SQL request and return the objects selected as a list of
+        dictionnaries. Return an empty list if no object where found."""
         cur = self.execute_sql(sql=sql, data=obj)
         if cur == None:
             return []
