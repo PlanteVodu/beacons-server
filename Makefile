@@ -1,2 +1,4 @@
-test:
-	py -m unittest test.db_test
+test: FORCE
+	python3.7 -m unittest discover
+
+FORCE: ;
