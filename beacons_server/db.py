@@ -14,7 +14,7 @@ class DB:
     SQL_TABLES = {
         'slide': """CREATE TABLE IF NOT EXISTS slide (
             id integer PRIMARY KEY,
-            position interger
+            position integer,
         );""",
 
         'row': """CREATE TABLE IF NOT EXISTS row (
