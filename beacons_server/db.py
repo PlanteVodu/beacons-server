@@ -30,7 +30,7 @@ class DB:
             id integer PRIMARY KEY,
             parent_id integer,
             position integer,
-            title text,
+            name text,
             FOREIGN KEY (parent_id) REFERENCES row (id)
         );""",
 
@@ -38,7 +38,7 @@ class DB:
             id integer PRIMARY KEY,
             parent_id integer,
             position integer,
-            title text,
+            name text,
             FOREIGN KEY (parent_id) REFERENCES column (id)
         );""",
 
@@ -46,7 +46,7 @@ class DB:
             id integer PRIMARY KEY,
             parent_id integer,
             position integer,
-            title text,
+            name text,
             icon text,
             url text,
             FOREIGN KEY (parent_id) REFERENCES box (id)

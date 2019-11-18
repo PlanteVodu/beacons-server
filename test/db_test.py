@@ -22,7 +22,7 @@ class DBTest(unittest.TestCase):
 
 
     def test_insert_object(self):
-        self.assertEqual(self.db.insert_object('bookmark', {'title':'John'}), 1)
+        self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 1)
 
 
     def test_format_and_condition(self):
@@ -40,6 +40,6 @@ class DBTest(unittest.TestCase):
 
 
     def test_select_table(self):
-        self.db.insert_object('bookmark', {'title':'John'})
-        self.assertEqual(self.db.select_table('bookmark', title='Doe'), [])
-        # self.assertEqual(self.db.select_table('bookmark', title='John'), {'title':'John'})
+        self.db.insert_object('bookmark', {'name':'John'})
+        self.assertEqual(self.db.select_table('bookmark', name='Doe'), [])
+        # self.assertEqual(self.db.select_table('bookmark', name='John'), {'name':'John'})
