@@ -79,7 +79,7 @@ class DB:
         return None
 
 
-    def execute_sql(self, sql, data=None):
+    def execute_sql(self, sql, data = None):
         """Execute an SQL request along with data, if any."""
         try:
             if not self.SILENT:
