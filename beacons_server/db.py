@@ -15,6 +15,7 @@ class DB:
         'slide': """CREATE TABLE IF NOT EXISTS slide (
             id integer PRIMARY KEY,
             position integer,
+            name text
         );""",
 
         'row': """CREATE TABLE IF NOT EXISTS row (
