@@ -123,24 +123,34 @@ class DB:
         return cur.lastrowid
 
 
-    def select_sql(self, sql, obj=None):
+    def select_sql(self, sql, obj=None, unique=False):
         """Execute an SQL request and return the objects selected as a list of
-        dictionnaries. Return an empty list if no object where found."""
+        dictionnaries. Return an empty list if no object where found.
+        If 'unique' is True, return the object itself if it exists or None."""
         cur = self.execute_sql(sql=sql, data=obj)
         if cur == None:
+            print('select_sql: cur is None! Actually this condition is useful! :)')
+            if unique:
+                return None
             return []
-        return [dict(row) for row in cur.fetchall()]
+        res = [dict(row) for row in cur.fetchall()]
+        if unique:
+            if len(res) > 0:
+                return res[0]
+            return None
+        return res
 
 
-    def select(self, table, orderBy='', **kwargs):
+    def select(self, table, orderBy='', unique=False, **kwargs):
         """Apply a SELECT request on a table. It can specify an AND
-        condition using named arguments and an ORDER BY."""
+        condition using named arguments and an ORDER BY.
+        If 'unique' is True, return the object itself if it exists or None."""
         where = self._format_and_condition(**kwargs)
         orderBy = self._format_order_by(orderBy)
 
         sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
 
-        return self.select_sql(sql, list(kwargs.values()))
+        return self.select_sql(sql, list(kwargs.values()), unique)
 
 
     def _format_and_condition(self, **kwargs):

@@ -40,6 +40,16 @@ class DBTest(unittest.TestCase):
 
 
     def test_select(self):
-        self.db.insert_object('bookmark', {'name':'John'})
-        self.assertEqual(self.db.select('bookmark', name='Doe'), [])
+        id1 = self.db.insert_object('bookmark', {'name':'John', 'position':2})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':1})
+
+        self.assertEqual(self.db.select('bookmark', name='Bob'), [])
+        self.assertIsNone(self.db.select('bookmark', unique=True, name='Bob'))
+
         self.assertEqual(len(self.db.select('bookmark', name='John')), 1)
+        self.assertIsInstance(self.db.select('bookmark', unique=True, name='John'), dict)
+        self.assertIs(self.db.select('bookmark', unique=True, name='John')['id'], id1)
+
+        items = self.db.select('bookmark', orderBy='position')
+        self.assertEqual(items[0]['position'], 1)
+        self.assertEqual(items[1]['position'], 2)
