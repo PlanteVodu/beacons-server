@@ -123,7 +123,7 @@ class DB:
         return cur.lastrowid
 
 
-    def select(self, sql, obj=None):
+    def select_sql(self, sql, obj=None):
         """Execute an SQL request and return the objects selected as a list of
         dictionnaries. Return an empty list if no object where found."""
         cur = self.execute_sql(sql=sql, data=obj)
@@ -132,7 +132,7 @@ class DB:
         return [dict(row) for row in cur.fetchall()]
 
 
-    def select_table(self, table, orderBy='', **kwargs):
+    def select(self, table, orderBy='', **kwargs):
         """Apply a SELECT request on a table. It can specify an AND
         condition using named arguments and an ORDER BY."""
         where = self._format_and_condition(**kwargs)
@@ -140,7 +140,7 @@ class DB:
 
         sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
 
-        return self.select(sql, list(kwargs.values()))
+        return self.select_sql(sql, list(kwargs.values()))
 
 
     def _format_and_condition(self, **kwargs):

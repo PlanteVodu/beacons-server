@@ -17,7 +17,7 @@ class DBTest(unittest.TestCase):
 
     def test_tables_exist(self):
         sql = "SELECT name FROM sqlite_master WHERE type='table'"
-        res = self.db.select(sql)
+        res = self.db.select_sql(sql)
         self.assertEqual(len(res), 5)
 
 
@@ -39,7 +39,7 @@ class DBTest(unittest.TestCase):
                          'ORDER BY id, position')
 
 
-    def test_select_table(self):
+    def test_select(self):
         self.db.insert_object('bookmark', {'name':'John'})
-        self.assertEqual(self.db.select_table('bookmark', name='Doe'), [])
-        self.assertEqual(len(self.db.select_table('bookmark', name='John')), 1)
+        self.assertEqual(self.db.select('bookmark', name='Doe'), [])
+        self.assertEqual(len(self.db.select('bookmark', name='John')), 1)
