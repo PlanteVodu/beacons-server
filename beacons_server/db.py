@@ -250,3 +250,20 @@ class DB:
             data = data + (parent_id,)
 
         return self.select_sql(sql, data)
+
+
+    def remove_item(self, table, id):
+        """Remove the specified item and move up it's following items."""
+        item = self.select(table, unique = True, id = id)
+        if item is None:
+            return
+        if 'parent_id' in item:
+            self._reposition_items(table, direction='up', min_position=item['position']+1, parent_id=item['parent_id'])
+        self._delete_item(table, id)
+
+
+    def _delete_item(self, table, id):
+        """Delete the specified item from the database."""
+        sql = 'DELETE FROM %s WHERE id = ?' % table
+        data = (id,)
+        self.execute_sql(sql, data)

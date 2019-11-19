@@ -120,3 +120,27 @@ class DBTest(unittest.TestCase):
             self.assertEqual(item['position'], index)
         items = self.db.select('bookmark', position = 4)
         self.assertEqual(len(items), 1)
+
+
+    def test_delete_item(self):
+        id = self.db.insert_object('bookmark', {'name':'Joh'})
+        self.assertIsNotNone(self.db.select('bookmark', unique=True, id=id))
+        self.db._delete_item('bookmark', id)
+        self.assertIsNone(self.db.select('bookmark', unique=True, id=id))
+
+
+    def test_remove_item(self):
+        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})
+        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})
+        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})
+        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})
+
+        self.db.remove_item('bookmark', id2)
+
+        items = self.db.select('bookmark', orderBy='position', parent_id=1)
+        self.assertEqual(items[0]['position'], 1)
+        self.assertEqual(items[1]['position'], 2)
+        self.assertEqual(items[2]['position'], 3)
+
+        self.assertEqual(self.db.select('bookmark', unique=True, parent_id=2)['position'], 1)
