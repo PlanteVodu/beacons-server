@@ -145,31 +145,36 @@ class DB:
         """Apply a SELECT request on a table. It can specify an AND
         condition using named arguments and an ORDER BY.
         If 'unique' is True, return the object itself if it exists or None."""
-        where = self._format_and_condition(**kwargs)
+        where = self._format_and_condition(*kwargs.keys())
         orderBy = self._format_order_by(orderBy)
 
         sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
+        data = tuple(kwargs.values())
 
-        return self.select_sql(sql, list(kwargs.values()), unique)
+        return self.select_sql(sql, data, unique)
 
 
-    def _format_and_condition(self, **kwargs):
+    def _format_fields_values(self, *args):
+        """Return an array of strings, each string being in the form
+        'field = ?'."""
+        if len(args) == 0:
+            return ''
+        return ['%s = ?' % field for field in args]
+
+
+    def _format_and_condition(self, *args):
         """Return a WHERE condition with every named argument received
         using an AND condition."""
-        if len(kwargs) == 0:
+        if len(args) == 0:
             return ''
-
-        conditions = [f'{key} = ?' for key in kwargs.keys()]
-        where = 'WHERE ' + ' AND '.join(conditions)
-
-        return where
+        fields_values = self._format_fields_values(*args)
+        return 'WHERE ' + ' AND '.join(fields_values)
 
 
     def _format_order_by(self, orderBy=''):
         """Return an ORDER BY formated with either a string or a list."""
         if len(orderBy) == 0:
             return ''
-
         if type(orderBy) is list:
             orderBy = ', '.join(orderBy)
 

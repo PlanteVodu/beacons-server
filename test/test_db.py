@@ -25,9 +25,18 @@ class DBTest(unittest.TestCase):
         self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 1)
 
 
+    def test_format_fields_values(self):
+        self.assertEqual(self.db._format_fields_values(), '')
+        self.assertEqual(self.db._format_fields_values('id'),
+                         ['id = ?'])
+        self.assertEqual(self.db._format_fields_values('id', 'name'),
+                         ['id = ?', 'name = ?'])
+
+
     def test_format_and_condition(self):
         self.assertEqual(self.db._format_and_condition(), '')
-        self.assertEqual(self.db._format_and_condition(id=2, name='John'),
+        self.assertEqual(self.db._format_and_condition('id'), 'WHERE id = ?')
+        self.assertEqual(self.db._format_and_condition('id', 'name'),
                          'WHERE id = ? AND name = ?')
 
 
