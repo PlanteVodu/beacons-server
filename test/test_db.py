@@ -64,23 +64,28 @@ class DBTest(unittest.TestCase):
         self.assertEqual(items[1]['position'], 2)
 
 
-    def test_update_item_parent(self):
-        id = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
-        self.db._update_item_parent('bookmark', id, 2)
-        item = self.db.select('bookmark', unique=True, id=id)
-        self.assertEqual(item['parent_id'], 2)
-
-
-    def test_update_item_position(self):
+    def test_update_item(self):
         id = self.db.insert_object('bookmark', {'name':'John', 'position':1})
 
         item = self.db.select('bookmark', id = id)
         self.assertEqual(item[0]['position'], 1)
 
-        self.db._update_item_position('bookmark', id, 2)
+        # Testing with 0 argument
+        self.db.update_item('bookmark', id)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['name'], 'John')
+        self.assertEqual(item[0]['position'], 1)
 
+        # Testing with 1 argument
+        self.db.update_item('bookmark', id, position=2)
         item = self.db.select('bookmark', id = id)
         self.assertEqual(item[0]['position'], 2)
+
+        # Testing with 2 arguments
+        self.db.update_item('bookmark', id, name='Doe', position=3)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['name'], 'Doe')
+        self.assertEqual(item[0]['position'], 3)
 
 
     def test_select_items_to_move(self):
