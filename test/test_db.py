@@ -53,3 +53,70 @@ class DBTest(unittest.TestCase):
         items = self.db.select('bookmark', orderBy='position')
         self.assertEqual(items[0]['position'], 1)
         self.assertEqual(items[1]['position'], 2)
+
+
+    def test_update_item_parent(self):
+        id = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
+        self.db._update_item_parent('bookmark', id, 2)
+        item = self.db.select('bookmark', unique=True, id=id)
+        self.assertEqual(item['parent_id'], 2)
+
+
+    def test_update_item_position(self):
+        id = self.db.insert_object('bookmark', {'name':'John', 'position':1})
+
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['position'], 1)
+
+        self.db.update_item_position('bookmark', id, 2)
+
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['position'], 2)
+
+
+    def test_select_items_to_move(self):
+        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})
+        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})
+        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})
+        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})
+
+        items_to_move = self.db._select_items_to_move('bookmark', min_position = 1, parent_id = 1)
+        self.assertEqual(len(items_to_move), 4)
+
+        items_to_move = self.db._select_items_to_move('bookmark', min_position = 2, max_position = 4, parent_id = 1)
+        self.assertEqual(len(items_to_move), 3)
+
+        items_to_move = self.db._select_items_to_move('bookmark', min_position = 2, parent_id = 2)
+        self.assertEqual(len(items_to_move), 0)
+
+
+    def test_reposition_items(self):
+        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})
+        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})
+        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})
+        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})
+
+        # Move up all items
+        self.db.reposition_items('bookmark', direction = 'up', min_position = 1, parent_id = 1)
+        items_moved = self.db._select_items_to_move('bookmark', min_position = 0, parent_id = 1)
+        for index, item in enumerate(items_moved):
+            self.assertEqual(item['position'], index)
+        items = self.db.select('bookmark', parent_id = 2)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['position'], 1)
+
+        # Move down all items
+        self.db.reposition_items('bookmark', direction = 'down', min_position = 0, parent_id = 1)
+        items_moved = self.db._select_items_to_move('bookmark', min_position = 0, parent_id = 1)
+        for index, item in enumerate(items_moved):
+            self.assertEqual(item['position'], index + 1)
+
+        # Move down items from 1 to 3
+        self.db.reposition_items('bookmark', direction = 'up', min_position = 1, max_position = 3, parent_id = 1)
+        items_moved = self.db._select_items_to_move('bookmark', min_position = 0, max_position = 3, parent_id = 1)
+        for index, item in enumerate(items_moved):
+            self.assertEqual(item['position'], index)
+        items = self.db.select('bookmark', position = 4)
+        self.assertEqual(len(items), 1)

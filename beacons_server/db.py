@@ -174,3 +174,79 @@ class DB:
             orderBy = ', '.join(orderBy)
 
         return 'ORDER BY %s' % orderBy
+
+
+    def _update_item_parent(self, table, id, new_parent_id):
+        """Update an item's parent inside the database."""
+        sql = 'UPDATE %s SET parent_id = ? WHERE id = ?' % table
+        data = (new_parent_id, id,)
+        self.execute_sql(sql, data)
+
+
+    def move_item(self, table, id, new_position, parent_id = None):
+        """Change an item's position and parent and update the affected
+        items so that every item's positions remain consecutive.
+
+        If only the item's position is modified, the affected items are
+        moved up or down accordingly.
+
+        If the item's parent is changed, the positions of the items from
+        both old and new parents are updated as follows :
+        - move up (position-1) the old following items (from the old parent)
+        - move down (position+1) the new following items (from the new
+        parent)"""
+        item = self.select(table, unique = True, id = id)
+        if item is None:
+            return
+        if 'parent_id' in item and parent_id != None and item['parent_id'] != parent_id:
+            # Update affected items from both old and new parents
+            # Move up the old parent's items from old_position+1 to last
+            self.reposition_items(table, direction='up', min_position=item['position']+1, parent_id=item['parent_id'])
+            # Move down the new parent's items from new_position to last
+            self.reposition_items(table, direction='up', min_position=new_position, parent_id=parent_id)
+
+            self.update_item_position(table, id, new_position)
+            self._update_item_parent(table, id, parent_id)
+        elif item['position'] != new_position:
+            if item['position'] < new_position: # move item up
+                # Move down items from new_position to old_position-1
+                self.reposition_items(table, direction='down', min_position=new_position, max_position=item['position']-1)
+            else: # move item down
+                # Move up items from old_position+1 to new_position
+                self.reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position)
+
+            self.update_item_position(table, id, new_position)
+
+
+    def update_item_position(self, table, id, new_position):
+        """Update an item's position inside the database."""
+        sql = 'UPDATE %s SET position = ? WHERE id = ?' % table
+        data = (new_position, id,)
+        self.execute_sql(sql, data)
+
+
+    def reposition_items(self, table, direction, min_position, max_position = None, parent_id = None):
+        """Increase or decrease a range of items' position."""
+        items_to_move = self._select_items_to_move(table = table, min_position = min_position, max_position = max_position, parent_id = parent_id)
+
+        amount = -1 if direction == 'up' else +1
+
+        for item in items_to_move:
+            new_position = item['position'] + amount
+            self.update_item_position(table, item['id'], new_position)
+
+
+    def _select_items_to_move(self, table, min_position, max_position = None, parent_id = None):
+        """Return items inside a range of positions having the given parent."""
+        sql = 'SELECT * FROM %s WHERE position >= ?' % table
+        data = (min_position,)
+
+        if max_position is not None:
+            sql += ' AND position <= ?'
+            data = data + (max_position,)
+
+        if parent_id is not None:
+            sql += ' AND parent_id = ?'
+            data = data + (parent_id,)
+
+        return self.select_sql(sql, data)
