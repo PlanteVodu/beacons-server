@@ -268,3 +268,22 @@ class DB:
         sql = 'DELETE FROM %s WHERE id = ?' % table
         data = (id,)
         self.execute_sql(sql, data)
+
+
+    def get_items_with_descendants(self, table, parent_id = None):
+        """Return items with the specified parent along with all
+        their descendants (childs, grand-childs, etc.)."""
+        if parent_id is None:
+            items = self.select(table, orderBy='position')
+        else:
+            items = self.select(table, orderBy='position', parent_id=parent_id)
+
+        type_index = self.OBJ_TYPES.index(table)
+        if type_index == len(self.OBJ_TYPES) - 1:
+            return items
+
+        childs_table = self.OBJ_TYPES[type_index+1]
+        for i, item in enumerate(items):
+            items[i]['content'] = self.get_items_with_descendants(childs_table, item['id'])
+
+        return items
