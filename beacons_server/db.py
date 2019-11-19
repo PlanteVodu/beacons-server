@@ -201,31 +201,31 @@ class DB:
         if 'parent_id' in item and parent_id != None and item['parent_id'] != parent_id:
             # Update affected items from both old and new parents
             # Move up the old parent's items from old_position+1 to last
-            self.reposition_items(table, direction='up', min_position=item['position']+1, parent_id=item['parent_id'])
+            self._reposition_items(table, direction='up', min_position=item['position']+1, parent_id=item['parent_id'])
             # Move down the new parent's items from new_position to last
-            self.reposition_items(table, direction='up', min_position=new_position, parent_id=parent_id)
+            self._reposition_items(table, direction='up', min_position=new_position, parent_id=parent_id)
 
-            self.update_item_position(table, id, new_position)
+            self._update_item_position(table, id, new_position)
             self._update_item_parent(table, id, parent_id)
         elif item['position'] != new_position:
             if item['position'] < new_position: # move item up
                 # Move down items from new_position to old_position-1
-                self.reposition_items(table, direction='down', min_position=new_position, max_position=item['position']-1)
+                self._reposition_items(table, direction='down', min_position=new_position, max_position=item['position']-1)
             else: # move item down
                 # Move up items from old_position+1 to new_position
-                self.reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position)
+                self._reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position)
 
-            self.update_item_position(table, id, new_position)
+            self._update_item_position(table, id, new_position)
 
 
-    def update_item_position(self, table, id, new_position):
+    def _update_item_position(self, table, id, new_position):
         """Update an item's position inside the database."""
         sql = 'UPDATE %s SET position = ? WHERE id = ?' % table
         data = (new_position, id,)
         self.execute_sql(sql, data)
 
 
-    def reposition_items(self, table, direction, min_position, max_position = None, parent_id = None):
+    def _reposition_items(self, table, direction, min_position, max_position = None, parent_id = None):
         """Increase or decrease a range of items' position."""
         items_to_move = self._select_items_to_move(table = table, min_position = min_position, max_position = max_position, parent_id = parent_id)
 
@@ -233,7 +233,7 @@ class DB:
 
         for item in items_to_move:
             new_position = item['position'] + amount
-            self.update_item_position(table, item['id'], new_position)
+            self._update_item_position(table, item['id'], new_position)
 
 
     def _select_items_to_move(self, table, min_position, max_position = None, parent_id = None):
