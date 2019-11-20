@@ -55,10 +55,12 @@ class DB:
     }
 
 
-    def __init__(self, db_path, silent=False):
+    def __init__(self, db_path, create_tables=False, silent=False):
         """Initialize the connection with the SQLite data base file."""
         self.conn = self._create_connection(db_path)
-        self.SILENT = False
+        self.SILENT = silent
+        if create_tables:
+            self.create_tables()
 
 
     def __del__(self):
