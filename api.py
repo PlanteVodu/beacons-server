@@ -21,7 +21,8 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 general_parser = reqparse.RequestParser()
 general_parser.add_argument('id', type=int)
-general_parser.add_argument('name')
+# general_parser.add_argument('id', type=int)
+general_parser.add_argument('title')
 general_parser.add_argument('position', type=int)
 
 child_parser = general_parser.copy()
@@ -75,15 +76,8 @@ class Bookmarks(Resource):
     def post(self):
         db = get_db()
         args = Bookmarks.parser.parse_args()
-        id1 = db.insert_object('bookmark', args)
-        return db.select('bookmark', unique=True, id=id1)
-
-        # id = cur.lastrowid
-
-        # if id != None:
-            # return self.select(table, unique=True, id=id)
-
-        # return id
+        id = db.insert_object('bookmark', args)
+        return db.select('bookmark', unique=True, id=id), 201
 
 
     # def delete(self, id):
