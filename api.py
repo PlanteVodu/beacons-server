@@ -6,6 +6,7 @@ import colorama
 from colorama import Fore, Back, Style
 
 from beacons_server import db
+from resources.bookmark import Bookmark
 
 colorama.init(autoreset=True)
 
@@ -18,28 +19,6 @@ app = Flask(
 api = Api(app)
 
 CORS(app, resources={r'/*': {'origins': '*'}})
-
-general_parser = reqparse.RequestParser()
-general_parser.add_argument('id', type=int)
-# general_parser.add_argument('id', type=int)
-general_parser.add_argument('title', default='', trim=True)
-general_parser.add_argument('position', type=int, required=True, help='Element must specify a position')
-
-child_parser = general_parser.copy()
-child_parser.add_argument('parent_id', type=int, required=True, help='Element must specify a parent_id')
-
-row_parser = child_parser.copy()
-row_parser.add_argument('css', default='', trim=True)
-
-
-def get_db():
-    return db.DB('beacons.sqlite')
-
-
-def abort_if_item_doesnt_exist(item):
-    if item is None:
-       abort(404, message="Could not find this resource")
-
 
 # def item_must_exist(table):
 #     def wrapper(func):
@@ -58,73 +37,8 @@ def abort_if_item_doesnt_exist(item):
 #     return wrapper
 
 
-class Bookmarks(Resource):
-
-    parser = child_parser.copy()
-    parser.add_argument('url', trim=True)
-    parser.add_argument('icon', trim=True)
-
-    full_parser = parser.copy()
-    full_parser.replace_argument('title', default='', trim=True)
-    full_parser.replace_argument('url', default='', trim=True)
-    full_parser.replace_argument('icon', default='', trim=True)
-
-    patch_parser = parser.copy()
-    patch_parser.replace_argument('position', type=int)
-    patch_parser.replace_argument('parent_id', type=int)
-
-
-    def get(self, id = None):
-        if id is None:
-            return get_db().select('bookmark', orderBy='id')
-        item = get_db().select('bookmark', unique=True, id=id)
-        abort_if_item_doesnt_exist(item)
-        return item
-
-
-    def post(self):
-        db = get_db()
-        args = Bookmarks.full_parser.parse_args()
-        id = db.insert_object('bookmark', args)
-        return db.select('bookmark', unique=True, id=id), 201
-
-
-    def delete(self, id):
-        db = get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        abort_if_item_doesnt_exist(item)
-        db.remove_item('bookmark', id)
-        return '', 204
-
-
-    def put(self, id):
-        db = get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        args = Bookmarks.full_parser.parse_args()
-
-        # if item is None:
-        #     id = db.insert_object('bookmark', args)
-        #     return db.select('bookmark', unique=True, id=id), 201
-
-        db.update_item('bookmark', id=id, args=args)
-        updated_item = db.select('bookmark', unique=True, id=id)
-        return updated_item, 200
-
-
-    def patch(self, id):
-        db = get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        abort_if_item_doesnt_exist(item)
-
-        args = Bookmarks.patch_parser.parse_args()
-        db.update_item('bookmark', id=id, args=args)
-
-        updated_item = db.select('bookmark', unique=True, id=id)
-        return updated_item, 201
-
-
-api.add_resource(Bookmarks, '/bookmarks')
-api.add_resource(Bookmarks, '/bookmarks/<int:id>', endpoint='id')
+api.add_resource(Bookmark, '/bookmarks')
+api.add_resource(Bookmark, '/bookmarks/<int:id>', endpoint='id')
 
 
 if __name__ == '__main__':
