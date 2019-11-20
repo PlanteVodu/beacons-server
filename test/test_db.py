@@ -22,7 +22,7 @@ class DBTest(unittest.TestCase):
 
 
     def test_insert_object(self):
-        self.assertIsInstance(self.db.insert_object('bookmark', {'name':'John'}), dict)
+        self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 1)
 
 
     def test_format_fields_values(self):
@@ -49,8 +49,8 @@ class DBTest(unittest.TestCase):
 
 
     def test_select(self):
-        id1 = self.db.insert_object('bookmark', {'name':'John', 'position':2})['id']
-        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':1})['id']
+        id1 = self.db.insert_object('bookmark', {'name':'John', 'position':2})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':1})
 
         self.assertEqual(self.db.select('bookmark', name='Bob'), [])
         self.assertIsNone(self.db.select('bookmark', unique=True, name='Bob'))
@@ -65,27 +65,27 @@ class DBTest(unittest.TestCase):
 
 
     def test_update_item(self):
-        id = self.db.insert_object('bookmark', {'name':'John', 'position':1})['id']
+        id = self.db.insert_object('bookmark', {'name':'John', 'position':1})
 
-        item = self.db.select('bookmark', unique=True, id=id)
-        self.assertEqual(item['position'], 1)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['position'], 1)
 
         # Testing with 0 argument
         self.db.update_item('bookmark', id)
-        item = self.db.select('bookmark', unique=True, id=id)
-        self.assertEqual(item['name'], 'John')
-        self.assertEqual(item['position'], 1)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['name'], 'John')
+        self.assertEqual(item[0]['position'], 1)
 
         # Testing with 1 argument
         self.db.update_item('bookmark', id, position=2)
-        item = self.db.select('bookmark', unique=True, id=id)
-        self.assertEqual(item['position'], 2)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['position'], 2)
 
         # Testing with 2 arguments
         self.db.update_item('bookmark', id, name='Doe', position=3)
-        item = self.db.select('bookmark', unique=True, id=id)
-        self.assertEqual(item['name'], 'Doe')
-        self.assertEqual(item['position'], 3)
+        item = self.db.select('bookmark', id = id)
+        self.assertEqual(item[0]['name'], 'Doe')
+        self.assertEqual(item[0]['position'], 3)
 
 
     def test_select_items_to_move(self):
@@ -137,18 +137,18 @@ class DBTest(unittest.TestCase):
 
 
     def test_delete_item(self):
-        id = self.db.insert_object('bookmark', {'name':'Joh'})['id']
+        id = self.db.insert_object('bookmark', {'name':'Joh'})
         self.assertIsNotNone(self.db.select('bookmark', unique=True, id=id))
         self.db._delete_item('bookmark', id)
         self.assertIsNone(self.db.select('bookmark', unique=True, id=id))
 
 
     def test_remove_item(self):
-        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})['id']
-        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})['id']
-        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})['id']
-        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})['id']
-        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})['id']
+        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})
+        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})
+        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})
+        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})
+        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})
 
         self.db.remove_item('bookmark', id2)
 
@@ -158,18 +158,3 @@ class DBTest(unittest.TestCase):
         self.assertEqual(items[2]['position'], 3)
 
         self.assertEqual(self.db.select('bookmark', unique=True, parent_id=2)['position'], 1)
-
-
-    def test_get_sorted_table_items(self):
-        id1 = self.db.insert_object('bookmark', {'name':'Joh', 'position':1, 'parent_id':1})['id']
-        id2 = self.db.insert_object('bookmark', {'name':'Doe', 'position':2, 'parent_id':1})['id']
-        id3 = self.db.insert_object('bookmark', {'name':'Bob', 'position':3, 'parent_id':1})['id']
-        id4 = self.db.insert_object('bookmark', {'name':'Foo', 'position':4, 'parent_id':1})['id']
-        id5 = self.db.insert_object('bookmark', {'name':'Olf', 'position':1, 'parent_id':2})['id']
-        self.db.remove_item('bookmark', id2)
-
-        items = self.db.data['bookmark']
-
-        self.assertEqual(sorted(items.keys()), [id1,id3,id4,id5])
-        for item in items.values():
-            self.assertIsInstance(item, dict)
