@@ -183,13 +183,16 @@ class DB:
         return 'ORDER BY %s' % orderBy
 
 
-    def update_item(self, table, id, **kwargs):
+    def update_item(self, table, id, args = {}, **kwargs):
         """Update the specified item's fields with the given values."""
-        if len(kwargs) == 0:
+        if len(kwargs) > 0:
+            args = kwargs
+        elif len(args) == 0:
             return
-        fields_values = ', '.join(self._format_fields_values(*kwargs.keys()))
+        args = {k:v for k,v in args.items() if v != None}
+        fields_values = ', '.join(self._format_fields_values(*args.keys()))
+        data = tuple(args.values()) + (id,)
         sql = 'UPDATE %s SET %s WHERE id = ?' % (table, fields_values)
-        data = tuple(kwargs.values()) + (id,)
         self.execute_sql(sql, data)
 
 
