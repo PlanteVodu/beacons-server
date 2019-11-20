@@ -7,6 +7,10 @@ from colorama import Fore, Back, Style
 
 from beacons_server import db
 from resources.bookmark import Bookmark
+from resources.box import Box
+from resources.column import Column
+from resources.row import Row
+from resources.slide import Slide
 
 colorama.init(autoreset=True)
 
@@ -37,8 +41,20 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 #     return wrapper
 
 
-api.add_resource(Bookmark, '/bookmarks')
-api.add_resource(Bookmark, '/bookmarks/<int:id>', endpoint='id')
+api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
+api.add_resource(Bookmark, '/bookmarks/<int:id>', endpoint='bookmark')
+
+api.add_resource(Box, '/boxes', endpoint='box')
+api.add_resource(Box, '/boxes/<int:id>', endpoint='boxes')
+
+api.add_resource(Column, '/columns', endpoint='columns')
+api.add_resource(Column, '/columns/<int:id>', endpoint='column')
+
+api.add_resource(Row, '/rows', endpoint='rows')
+api.add_resource(Row, '/rows/<int:id>', endpoint='row')
+
+api.add_resource(Slide, '/slides', endpoint='slides')
+api.add_resource(Slide, '/slides/<int:id>', endpoint='slide')
 
 
 if __name__ == '__main__':
