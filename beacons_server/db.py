@@ -58,30 +58,7 @@ class DB:
     def __init__(self, db_path, silent=False):
         """Initialize the connection with the SQLite data base file."""
         self.conn = self._create_connection(db_path)
-        self.SILENT = silent
-        if create_tables:
-            self.create_tables()
-        self._set_tables_data()
-
-
-    def _set_tables_data(self):
-        self.data = {table: self._get_sorted_table_items(table) for table in DB.OBJ_TYPES}
-
-
-    def _get_sorted_table_items(self, table):
-        items = self.select(table, orderBy='id')
-        return {item['id']: item for item in items}
-
-
-    def _update_item_data(self, table, id):
-        item = self.select(table, id=id, unique=True)
-        if item != None:
-            self.data[table][id] = item
-        return item
-
-
-    def _remove_item_data(self, table, id):
-        self.data[table].pop(id, None)
+        self.SILENT = False
 
 
     def __del__(self):
@@ -143,9 +120,7 @@ class DB:
             sql = 'INSERT INTO %s %s VALUES %s' % (table, fields, values)
 
         cur = self.execute_sql(sql, tuple(obj.values()))
-
-        id = cur.lastrowid
-        return self._update_item_data(table, cur.lastrowid)
+        return cur.lastrowid
 
 
     def select_sql(self, sql, obj=None, unique=False):
@@ -217,8 +192,6 @@ class DB:
         data = tuple(kwargs.values()) + (id,)
         self.execute_sql(sql, data)
 
-        return self._update_item_data(table, id)
-
 
     def move_item(self, table, id, new_position, parent_id = None):
         """Change an item's position and parent and update the affected
@@ -234,7 +207,7 @@ class DB:
         parent)"""
         item = self.select(table, unique = True, id = id)
         if item is None:
-            return None
+            return
         if 'parent_id' in item and parent_id != None and item['parent_id'] != parent_id:
             # Update affected items from both old and new parents
             # Move up the old parent's items from old_position+1 to last
@@ -242,8 +215,8 @@ class DB:
             # Move down the new parent's items from new_position to last
             self._reposition_items(table, direction='up', min_position=new_position, parent_id=parent_id)
 
-            self.update_item(table, id, parent=parent_id)
             self.update_item(table, id, position=new_position)
+            self.update_item(table, id, parent=parent_id)
         elif item['position'] != new_position:
             if item['position'] < new_position: # move item up
                 # Move down items from new_position to old_position-1
@@ -253,8 +226,6 @@ class DB:
                 self._reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position)
 
             self.update_item(table, id, position=new_position)
-
-        return self._update_item_data(table, id)
 
 
     def _reposition_items(self, table, direction, min_position, max_position = None, parent_id = None):
@@ -299,7 +270,6 @@ class DB:
         sql = 'DELETE FROM %s WHERE id = ?' % table
         data = (id,)
         self.execute_sql(sql, data)
-        self._remove_item_data(table, id)
 
 
     def get_items_with_descendants(self, table, parent_id = None):
