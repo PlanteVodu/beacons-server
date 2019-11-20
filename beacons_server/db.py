@@ -55,10 +55,10 @@ class DB:
     }
 
 
-    def __init__(self, db_path):
+    def __init__(self, db_path, silent=False):
         """Initialize the connection with the SQLite data base file."""
         self.conn = self._create_connection(db_path)
-        self.SILENT = False
+        self.SILENT = silent
         if create_tables:
             self.create_tables()
         self._set_tables_data()
@@ -96,8 +96,8 @@ class DB:
             conn.row_factory = sqlite3.Row
             conn.text_factory = str
             return conn
-        except sqlite3.Error as e:
-            print(e)
+        except sqlite3.Error as exception:
+            raise SystemError("Could not establish a connection with the database '{}'. Error message: {}".format(path, exception))
 
         return None
 
@@ -155,6 +155,8 @@ class DB:
         cur = self.execute_sql(sql=sql, data=obj)
         if cur == None:
             print('select_sql: cur is None! Actually this condition is useful! :)')
+            print(sql)
+            print(obj)
             if unique:
                 return None
             return []
