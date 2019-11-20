@@ -22,14 +22,14 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 general_parser = reqparse.RequestParser()
 general_parser.add_argument('id', type=int)
 # general_parser.add_argument('id', type=int)
-general_parser.add_argument('title')
-general_parser.add_argument('position', type=int)
+general_parser.add_argument('title', default='', trim=True)
+general_parser.add_argument('position', type=int, required=True, help='Element must specify a position')
 
 child_parser = general_parser.copy()
-child_parser.add_argument('parent_id', type=int)
+child_parser.add_argument('parent_id', type=int, required=True, help='Element must specify a parent_id')
 
 row_parser = child_parser.copy()
-row_parser.add_argument('css')
+row_parser.add_argument('css', default='', trim=True)
 
 
 def get_db():
@@ -61,8 +61,8 @@ def abort_if_item_doesnt_exist(item):
 class Bookmarks(Resource):
 
     parser = child_parser.copy()
-    parser.add_argument('url')
-    parser.add_argument('icon')
+    parser.add_argument('url', default='', trim=True)
+    parser.add_argument('icon', default='', trim=True)
 
 
     def get(self, id = None):
