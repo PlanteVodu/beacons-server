@@ -58,8 +58,6 @@ class DB:
     def __init__(self, db_path):
         """Initialize the connection with the SQLite data base file."""
         self.conn = self._create_connection(db_path)
-        self.conn.row_factory = sqlite3.Row
-        self.conn.text_factory = str
         self.SILENT = False
 
 
@@ -72,6 +70,8 @@ class DB:
         """Create a database connection to a SQLite database."""
         try:
             conn = sqlite3.connect(path)
+            conn.row_factory = sqlite3.Row
+            conn.text_factory = str
             return conn
         except sqlite3.Error as e:
             print(e)
