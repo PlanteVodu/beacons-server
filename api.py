@@ -61,8 +61,17 @@ def abort_if_item_doesnt_exist(item):
 class Bookmarks(Resource):
 
     parser = child_parser.copy()
-    parser.add_argument('url', default='', trim=True)
-    parser.add_argument('icon', default='', trim=True)
+    parser.add_argument('url', trim=True)
+    parser.add_argument('icon', trim=True)
+
+    full_parser = parser.copy()
+    full_parser.replace_argument('title', default='', trim=True)
+    full_parser.replace_argument('url', default='', trim=True)
+    full_parser.replace_argument('icon', default='', trim=True)
+
+    patch_parser = parser.copy()
+    patch_parser.replace_argument('position', type=int)
+    patch_parser.replace_argument('parent_id', type=int)
 
 
     def get(self, id = None):
@@ -75,39 +84,43 @@ class Bookmarks(Resource):
 
     def post(self):
         db = get_db()
-        args = Bookmarks.parser.parse_args()
+        args = Bookmarks.full_parser.parse_args()
         id = db.insert_object('bookmark', args)
         return db.select('bookmark', unique=True, id=id), 201
 
 
-    # def delete(self, id):
-    #     db = get_db()
-    #     item = db.select('bookmark', unique=True, id=id)
-    #     abort_if_item_doesnt_exist(item)
-    #     db.remove_item('bookmark', id=id)
-    #     return '', 204
+    def delete(self, id):
+        db = get_db()
+        item = db.select('bookmark', unique=True, id=id)
+        abort_if_item_doesnt_exist(item)
+        db.remove_item('bookmark', id)
+        return '', 204
 
 
-    # def put(self, id):
-    #     item = db.select('bookmark', unique=True, id=id)
-    #     abort_if_item_doesnt_exist(item)
+    def put(self, id):
+        db = get_db()
+        item = db.select('bookmark', unique=True, id=id)
+        args = Bookmarks.full_parser.parse_args()
 
-    #     args = Bookmarks.parser.parse_args()
-    #     db.update_item('bookmark', id=id, *args)
+        # if item is None:
+        #     id = db.insert_object('bookmark', args)
+        #     return db.select('bookmark', unique=True, id=id), 201
 
-    #     updated_item = db.select('bookmark', unique=True, id=id)
-    #     return updated_item, 201
+        db.update_item('bookmark', id=id, args=args)
+        updated_item = db.select('bookmark', unique=True, id=id)
+        return updated_item, 200
 
 
-    # def patch(self, id):
-    #     item = db.select('bookmark', unique=True, id=id)
-    #     abort_if_item_doesnt_exist(item)
+    def patch(self, id):
+        db = get_db()
+        item = db.select('bookmark', unique=True, id=id)
+        abort_if_item_doesnt_exist(item)
 
-    #     args = Bookmarks.parser.parse_args()
-    #     db.update_item('bookmark', id=id, *args)
+        args = Bookmarks.patch_parser.parse_args()
+        db.update_item('bookmark', id=id, args=args)
 
-    #     updated_item = db.select('bookmark', unique=True, id=id)
-    #     return updated_item, 201
+        updated_item = db.select('bookmark', unique=True, id=id)
+        return updated_item, 201
 
 
 api.add_resource(Bookmarks, '/bookmarks')
