@@ -4,12 +4,12 @@ from beacons_server import utils
 class Slide(Resource):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('title', trim=True)
+    parser.add_argument('name', trim=True)
     parser.add_argument('position', type=int)
 
     full_parser = parser.copy()
     full_parser.replace_argument('position', type=int, required=True, help='Element must specify a position')
-    full_parser.replace_argument('title', default='', trim=True)
+    full_parser.replace_argument('name', default='', trim=True)
 
 
     def abort_if_item_doesnt_exist(self, item):
