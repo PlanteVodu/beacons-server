@@ -10,7 +10,7 @@ class Box(Resource):
 
     full_parser = parser.copy()
     full_parser.replace_argument('parent_id', type=int, required=True, help='Element must specify a parent_id')
-    full_parser.replace_argument('position', type=int, required=True, help='Element must specify a position')
+    full_parser.replace_argument('position', type=int, help='Element must specify a position')
     full_parser.replace_argument('name', default='', trim=True)
 
 

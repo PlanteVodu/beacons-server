@@ -112,7 +112,7 @@ class DB:
         Return the id of the row created."""
         if len(list(obj.values())) == 0:
             sql = 'INSERT INTO %s DEFAULT VALUES' % table
-            values = None
+            values = ()
         else:
             fields = '(%s)' % ','.join(obj.keys())
 
@@ -121,7 +121,16 @@ class DB:
 
             sql = 'INSERT INTO %s %s VALUES %s' % (table, fields, values)
 
-        cur = self.execute_sql(sql, tuple(obj.values()))
+        if 'position' in obj and obj['position'] is None:
+            if 'parent_id' in obj and obj['parent_id'] != None:
+                position = len(self.select(table, parent_id=obj['parent_id']))
+            else:
+                position = len(self.select(table))
+            obj['position'] = position
+
+        data = tuple(obj.values())
+
+        cur = self.execute_sql(sql, data)
         if cur != None:
             return cur.lastrowid
         return None

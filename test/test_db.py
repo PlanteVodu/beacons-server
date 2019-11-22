@@ -22,8 +22,23 @@ class DBTest(unittest.TestCase):
 
 
     def test_insert_object(self):
-        self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 1)
+        self.assertEqual(self.db.insert_object('bookmark', {}), 1)
+        self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 2)
         self.assertEqual(self.db.insert_object('bookmark', {'inexistentTable':'John'}), None)
+
+
+    def test_insert_generated_position(self):
+        # Without parent defined
+        id1 = self.db.insert_object('bookmark', {'position': None})
+        id2 = self.db.insert_object('bookmark', {'position': None})
+        self.assertEqual(self.db.select('bookmark', unique=True, id=id1)['position'], 0)
+        self.assertEqual(self.db.select('bookmark', unique=True, id=id2)['position'], 1)
+
+        # With parent defined
+        id3 = self.db.insert_object('bookmark', {'parent_id':1, 'position':None})
+        id4 = self.db.insert_object('bookmark', {'parent_id':1, 'position':None})
+        self.assertEqual(self.db.select('bookmark', unique=True, id=id3)['position'], 0)
+        self.assertEqual(self.db.select('bookmark', unique=True, id=id4)['position'], 1)
 
 
     def test_format_fields_values(self):
