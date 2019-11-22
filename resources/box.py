@@ -53,10 +53,12 @@ class Box(Resource):
 
     def patch(self, id):
         db = utils.get_db()
+
         item = db.select('box', unique=True, id=id)
         self.abort_if_item_doesnt_exist(item)
 
-        args = Box.patch_parser.parse_args()
+        args = Box.parser.parse_args()
+
         db.update_item('box', id=id, args=args)
 
         updated_item = db.select('box', unique=True, id=id)
