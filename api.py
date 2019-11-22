@@ -11,6 +11,7 @@ from resources.box import Box
 from resources.column import Column
 from resources.row import Row
 from resources.slide import Slide
+from beacons_server import utils
 
 colorama.init(autoreset=True)
 
@@ -39,6 +40,27 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 #             return func(*args, **kwargs)
 #         return function_wrapper
 #     return wrapper
+
+class Beacon(Resource):
+    def get(self):
+        beacons = utils.get_db().get_items_with_descendants('slide')
+
+        grid_items = []
+        nb_rows = 0
+
+        for slide in beacons:
+            nb_rows = max(nb_rows, len(slide['content']))
+            for index, row in enumerate(slide['content']):
+              row['position'] = index + 1
+              row['slideId'] = slide['id']
+              row['slidePosition'] = slide['position'] + 1
+              # row['slideCss'] = slide['css']
+              grid_items.append(row)
+
+        return grid_items
+
+
+api.add_resource(Beacon, '/beacons', endpoint='beacons')
 
 
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
