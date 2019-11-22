@@ -133,9 +133,6 @@ class DB:
         If 'unique' is True, return the object itself if it exists or None."""
         cur = self.execute_sql(sql=sql, data=obj)
         if cur == None:
-            print('select_sql: cur is None! Actually this condition is useful! :)')
-            print(sql)
-            print(obj)
             if unique:
                 return None
             return []
