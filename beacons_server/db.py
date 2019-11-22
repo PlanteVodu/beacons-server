@@ -144,15 +144,15 @@ class DB:
         return res
 
 
-    def select(self, table, orderBy='', unique=False, **kwargs):
+    def select(self, table, orderBy='', unique=False, args = {}, **kwargs):
         """Apply a SELECT request on a table. It can specify an AND
         condition using named arguments and an ORDER BY.
         If 'unique' is True, return the object itself if it exists or None."""
-        where = self._format_and_condition(*kwargs.keys())
+        where = self._format_and_condition(*args.keys(), *kwargs.keys())
         orderBy = self._format_order_by(orderBy)
 
         sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
-        data = tuple(kwargs.values())
+        data = tuple(args.values()) + tuple(kwargs.values())
 
         return self.select_sql(sql, data, unique)
 

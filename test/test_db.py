@@ -64,6 +64,16 @@ class DBTest(unittest.TestCase):
         self.assertEqual(items[0]['position'], 1)
         self.assertEqual(items[1]['position'], 2)
 
+        # Testing key words arguments search
+        items = self.db.select('bookmark', position=1)
+        self.assertEqual(items[0]['position'], 1)
+        self.assertEqual(len(items), 1)
+
+        # Testing dictionnary argument search
+        items = self.db.select('bookmark', args={'position':1})
+        self.assertEqual(items[0]['position'], 1)
+        self.assertEqual(len(items), 1)
+
 
     def test_update_item(self):
         id = self.db.insert_object('bookmark', {'name':'John', 'position':1})
