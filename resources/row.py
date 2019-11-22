@@ -58,7 +58,7 @@ class Row(Resource):
         item = db.select('row', unique=True, id=id)
         self.abort_if_item_doesnt_exist(item)
 
-        args = Row.patch_parser.parse_args()
+        args = Row.parser.parse_args()
         db.update_item('row', id=id, args=args)
 
         updated_item = db.select('row', unique=True, id=id)

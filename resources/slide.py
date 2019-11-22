@@ -54,7 +54,7 @@ class Slide(Resource):
         item = db.select('slide', unique=True, id=id)
         self.abort_if_item_doesnt_exist(item)
 
-        args = Slide.patch_parser.parse_args()
+        args = Slide.parser.parse_args()
         db.update_item('slide', id=id, args=args)
 
         updated_item = db.select('slide', unique=True, id=id)

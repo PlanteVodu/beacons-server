@@ -60,7 +60,7 @@ class Bookmark(Resource):
         item = db.select('bookmark', unique=True, id=id)
         self.abort_if_item_doesnt_exist(item)
 
-        args = Bookmark.patch_parser.parse_args()
+        args = Bookmark.parser.parse_args()
         db.update_item('bookmark', id=id, args=args)
 
         updated_item = db.select('bookmark', unique=True, id=id)

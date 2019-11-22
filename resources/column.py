@@ -56,7 +56,7 @@ class Column(Resource):
         item = db.select('column', unique=True, id=id)
         self.abort_if_item_doesnt_exist(item)
 
-        args = Column.patch_parser.parse_args()
+        args = Column.parser.parse_args()
         db.update_item('column', id=id, args=args)
 
         updated_item = db.select('column', unique=True, id=id)

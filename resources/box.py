@@ -58,7 +58,6 @@ class Box(Resource):
         self.abort_if_item_doesnt_exist(item)
 
         args = Box.parser.parse_args()
-
         db.update_item('box', id=id, args=args)
 
         updated_item = db.select('box', unique=True, id=id)
