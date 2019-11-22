@@ -23,6 +23,7 @@ class DBTest(unittest.TestCase):
 
     def test_insert_object(self):
         self.assertEqual(self.db.insert_object('bookmark', {'name':'John'}), 1)
+        self.assertEqual(self.db.insert_object('bookmark', {'inexistentTable':'John'}), None)
 
 
     def test_format_fields_values(self):

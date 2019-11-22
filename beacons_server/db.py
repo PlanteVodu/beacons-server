@@ -122,7 +122,9 @@ class DB:
             sql = 'INSERT INTO %s %s VALUES %s' % (table, fields, values)
 
         cur = self.execute_sql(sql, tuple(obj.values()))
-        return cur.lastrowid
+        if cur != None:
+            return cur.lastrowid
+        return None
 
 
     def select_sql(self, sql, obj=None, unique=False):
