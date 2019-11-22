@@ -41,9 +41,21 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 #         return function_wrapper
 #     return wrapper
 
-class Beacon(Resource):
+class Beacons(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('until', default='', trim=True)
+    parser.add_argument('transform', type=bool, default=False)
+
     def get(self):
-        beacons = utils.get_db().get_items_with_descendants('slide')
+        args = Beacons.parser.parse_args()
+
+        db = utils.get_db()
+        db.SILENT = True
+        beacons = db.get_items_with_descendants('slide', until=args['until'])
+        db.SILENT = False
+
+        if not args['transform'] or args['transform'] == 'false':
+            return beacons
 
         grid_items = []
         nb_rows = 0
@@ -60,7 +72,7 @@ class Beacon(Resource):
         return grid_items
 
 
-api.add_resource(Beacon, '/beacons', endpoint='beacons')
+api.add_resource(Beacons, '/beacons', endpoint='beacons')
 
 
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
