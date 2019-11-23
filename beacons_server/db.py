@@ -157,13 +157,39 @@ class DB:
         """Apply a SELECT request on a table. It can specify an AND
         condition using named arguments and an ORDER BY.
         If 'unique' is True, return the object itself if it exists or None."""
-        where = self._format_and_condition(*args.keys(), *kwargs.keys())
-        orderBy = self._format_order_by(orderBy)
+        where_args, sql_args = self._get_sql_args(args, **kwargs)
 
-        sql = "SELECT * FROM %s %s %s" % (table, where, orderBy)
-        data = tuple(args.values()) + tuple(kwargs.values())
+        where = self._format_and_condition(*where_args.keys())
+        sql_commands = self._format_sql_args(sql_args)
+
+        sql = "SELECT * FROM %s %s %s" % (table, where, sql_commands)
+        data = tuple(where_args.values())
 
         return self.select_sql(sql, data, unique)
+
+
+    def _get_sql_args(self, args = {}, **kwargs):
+        """Return received arguments splitted into two sets representing WHERE
+        arguments and SQL commands arguments. Sets are made according to the
+        arguments keys :
+        - SQL arguments' key starts with a '_' ; key is set in uppercase ;
+        - Every other argument goes inside the WHERE set.
+        Arguments with None values are ignored.
+        """
+        # Merge the two sets of args
+        args = {**args, **kwargs}
+        # Remove arguments' None values
+        args = {k:v for k,v in args.items() if v is not None}
+
+        # Get the SQL request's arguments
+        sql_keys = [k for k in args.keys() if k[0] == '_']
+        sql_args = {k:v for k,v in args.items() if k in sql_keys}
+
+        # Get the WHERE args by getting the difference with sql_args
+        where_keys = set(args.keys()).difference(sql_keys)
+        where_args = {k:v for k,v in args.items() if k in where_keys}
+
+        return where_args, sql_args
 
 
     def _format_fields_values(self, *args):
@@ -183,14 +209,20 @@ class DB:
         return 'WHERE ' + ' AND '.join(fields_values)
 
 
-    def _format_order_by(self, orderBy=''):
-        """Return an ORDER BY formated with either a string or a list."""
-        if len(orderBy) == 0:
-            return ''
-        if type(orderBy) is list:
-            orderBy = ', '.join(orderBy)
+    def _format_sql_args(self, args = {}):
+        """Return formated SQL arguments as a string.
+        Keys are uppercased and '_' are replaced with spaces, then trimmed.
+        Values can be either a unique value or a list. None values are ignored."""
+        format_sql_key = lambda k: k.upper().replace('_', ' ').strip()
 
-        return 'ORDER BY %s' % orderBy
+        commands = []
+        for key, value in args.items():
+            if value is None:
+                continue
+            if isinstance(value, list):
+                value = ', '.join(value)
+            commands.append('%s %s' % (format_sql_key(key), value))
+        return ' '.join(commands)
 
 
     def update_item(self, table, id, args = {}, **kwargs):

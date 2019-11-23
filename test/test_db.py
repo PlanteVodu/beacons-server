@@ -49,6 +49,34 @@ class DBTest(unittest.TestCase):
                          ['id = ?', 'name = ?'])
 
 
+    def test_get_sql_args(self):
+        # Test without argument
+        self.assertEqual(self.db._get_sql_args(), ({}, {}))
+
+        # Test with None value
+        self.assertEqual(self.db._get_sql_args(none_value=None), ({}, {}))
+
+        # Test with WHERE arguments using a dictionnary
+        self.assertEqual(self.db._get_sql_args({'id':1}), ({'id':1}, {}))
+        self.assertEqual(self.db._get_sql_args({'id':1,'name':'John'}), ({'id':1,'name':'John'}, {}))
+
+        # Test with SQL arguments using a dictionnary
+        self.assertEqual(self.db._get_sql_args({'_limit':5}), ({}, {'_limit':5}))
+        self.assertEqual(self.db._get_sql_args({'_order by':'id','_limit':5}), ({}, {'_limit':5, '_order by':'id'}))
+
+        # Test with WHERE + SQL arguments using a dictionnary
+        self.assertEqual(self.db._get_sql_args({'id':1, '_limit':5}), ({'id':1}, {'_limit':5}))
+
+        # Test with WHERE + SQL arguments using named arguments
+        self.assertEqual(self.db._get_sql_args(id=1, _limit=5), ({'id':1}, {'_limit':5}))
+
+        # Test with WHERE + SQL arguments using both a dictionnary and named arguments
+        self.assertEqual(self.db._get_sql_args(id=1, _limit=5, args={'name':'John', '_order by':'id'}), ({'id':1, 'name':'John'}, {'_limit':5, '_order by':'id'}))
+
+        # Test with WHERE + SQL arguments using both a dictionnary and named arguments with None values
+        self.assertEqual(self.db._get_sql_args(id=1, _limit=None, args={'name':None, '_order by':'id'}), ({'id':1}, {'_order by':'id'}))
+
+
     def test_format_and_condition(self):
         self.assertEqual(self.db._format_and_condition(), '')
         self.assertEqual(self.db._format_and_condition('id'), 'WHERE id = ?')
@@ -56,12 +84,12 @@ class DBTest(unittest.TestCase):
                          'WHERE id = ? AND name = ?')
 
 
-    def test_format_order_by(self):
-        self.assertEqual(self.db._format_order_by(''), '')
-        self.assertEqual(self.db._format_order_by('position'),
-                         'ORDER BY position')
-        self.assertEqual(self.db._format_order_by(['id', 'position']),
-                         'ORDER BY id, position')
+    def test_format_sql_args(self):
+        self.assertEqual(self.db._format_sql_args(), '')
+        self.assertEqual(self.db._format_sql_args({'limit':5}), 'LIMIT 5')
+        self.assertEqual(self.db._format_sql_args({'limit':5, 'nonevalue':None}), 'LIMIT 5')
+        self.assertEqual(self.db._format_sql_args({'order by':'id', 'limit':5}), 'ORDER BY id LIMIT 5')
+        self.assertEqual(self.db._format_sql_args({'order_by':'id', 'limit':5}), 'ORDER BY id LIMIT 5')
 
 
     def test_select(self):
@@ -75,7 +103,7 @@ class DBTest(unittest.TestCase):
         self.assertIsInstance(self.db.select('bookmark', unique=True, name='John'), dict)
         self.assertIs(self.db.select('bookmark', unique=True, name='John')['id'], id1)
 
-        items = self.db.select('bookmark', orderBy='position')
+        items = self.db.select('bookmark', _order_by='position')
         self.assertEqual(items[0]['position'], 1)
         self.assertEqual(items[1]['position'], 2)
 
@@ -178,7 +206,7 @@ class DBTest(unittest.TestCase):
 
         self.db.remove_item('bookmark', id2)
 
-        items = self.db.select('bookmark', orderBy='position', parent_id=1)
+        items = self.db.select('bookmark', _order_by='position', parent_id=1)
         self.assertEqual(items[0]['position'], 1)
         self.assertEqual(items[1]['position'], 2)
         self.assertEqual(items[2]['position'], 3)
