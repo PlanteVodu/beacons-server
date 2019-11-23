@@ -8,6 +8,12 @@ class BasicResource(Resource):
         self.parser.add_argument('position', type=int)
         self.parser.add_argument('name', trim=True)
 
+        self.parser.add_argument('_group_by', trim=True)
+        self.parser.add_argument('_order_by', trim=True)
+        self.parser.add_argument('_asc', trim=bool)
+        self.parser.add_argument('_desc', trim=bool)
+        self.parser.add_argument('_limit', trim=True)
+
         self.full_parser = self.parser.copy()
         self.full_parser.replace_argument('name', default='', trim=True)
 
