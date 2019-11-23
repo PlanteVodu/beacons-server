@@ -302,7 +302,7 @@ class DB:
 
     def remove_item(self, table, id):
         """Remove the specified item and move up it's following items."""
-        item = self.select(table, unique = True, id = id)
+        item = self.select(table, unique=True, id=id)
         if item is None:
             return
         if 'parent_id' in item:

@@ -26,22 +26,6 @@ api = Api(app)
 
 CORS(app, resources={r'/*': {'origins': '*'}})
 
-# def item_must_exist(table):
-#     def wrapper(func):
-#         def function_wrapper(*args, **kwargs):
-#             print('----- Decorator <item_must_exist>')
-#             print("table: %s" % table)
-#             if len(args) > 0:
-#                 print("args: %s" % args)
-#             print("kwargs: %s" % kwargs)
-#             print('func: %s' % func)
-#             # print(inspect.getfullargspec(func))
-#             # if len(args) > 0:
-#             # args[1] kwargs.keys()
-#             return func(*args, **kwargs)
-#         return function_wrapper
-#     return wrapper
-
 
 @app.route('/')
 def index():
@@ -53,8 +37,8 @@ api.add_resource(Beacons, '/beacons', endpoint='beacons')
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
 api.add_resource(Bookmark, '/bookmarks/<int:id>', endpoint='bookmark')
 
-api.add_resource(Box, '/boxes', endpoint='box')
-api.add_resource(Box, '/boxes/<int:id>', endpoint='boxes')
+api.add_resource(Box, '/boxes', endpoint='boxes')
+api.add_resource(Box, '/boxes/<int:id>', endpoint='box')
 
 api.add_resource(Column, '/columns', endpoint='columns')
 api.add_resource(Column, '/columns/<int:id>', endpoint='column')
