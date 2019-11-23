@@ -9,6 +9,9 @@ colorama.init(autoreset=True)
 
 class DB:
 
+    SQL_COMMANDS_ORDER = ['GROUP BY', 'ORDER BY', 'ASC', 'DESC', 'LIMIT']
+    SQL_COMMANDS_WITHOUT_ARGUMENT = ['ASC', 'DESC']
+
     # Describe the structure of the data base objects
     OBJ_TYPES = ['slide', 'row', 'column', 'box', 'bookmark']
     SQL_TABLES = {
@@ -212,16 +215,27 @@ class DB:
     def _format_sql_args(self, args = {}):
         """Return formated SQL arguments as a string.
         Keys are uppercased and '_' are replaced with spaces, then trimmed.
-        Values can be either a unique value or a list. None values are ignored."""
+        Values can be either a unique value or a list. None values are ignored.
+        This function also handles commands without arguments like ASC or DESC."""
         format_sql_key = lambda k: k.upper().replace('_', ' ').strip()
 
+        # Format args' keys into SQL commands
+        args = {format_sql_key(k):v for k,v in args.items()}
+
         commands = []
-        for key, value in args.items():
-            if value is None:
+        # We iterate over actual SQL commands to filter arguments but also to
+        # sort commands in order to form a consistent SQL request.
+        for key in DB.SQL_COMMANDS_ORDER:
+            if key not in args or args[key] is None:
                 continue
-            if isinstance(value, list):
-                value = ', '.join(value)
-            commands.append('%s %s' % (format_sql_key(key), value))
+            if key in DB.SQL_COMMANDS_WITHOUT_ARGUMENT:
+                commands.append(key)
+            else:
+                value = args[key]
+                if isinstance(value, list):
+                    value = ', '.join(value)
+                commands.append('%s %s' % (key, value))
+
         return ' '.join(commands)
 
 

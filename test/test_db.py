@@ -90,6 +90,8 @@ class DBTest(unittest.TestCase):
         self.assertEqual(self.db._format_sql_args({'limit':5, 'nonevalue':None}), 'LIMIT 5')
         self.assertEqual(self.db._format_sql_args({'order by':'id', 'limit':5}), 'ORDER BY id LIMIT 5')
         self.assertEqual(self.db._format_sql_args({'order_by':'id', 'limit':5}), 'ORDER BY id LIMIT 5')
+        self.assertEqual(self.db._format_sql_args({'order_by':'id', 'asc':True}), 'ORDER BY id ASC')
+        self.assertEqual(self.db._format_sql_args({'order_by':'id', 'desc':True}), 'ORDER BY id DESC')
 
 
     def test_select(self):
