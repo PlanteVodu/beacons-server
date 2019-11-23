@@ -32,6 +32,16 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/lastbookmarkslocations')
+def last_bookmarks_locations():
+    db = utils.get_db()
+
+    last_bookmarks = db.select('bookmark', _group_by='parent_id', _order_by='id', _desc=True, _limit=5)
+    boxes = [db.select('box', unique=True, id=bm['parent_id']) for bm in last_bookmarks]
+
+    return jsonify(boxes)
+
+
 api.add_resource(Beacons, '/beacons', endpoint='beacons')
 
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
