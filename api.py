@@ -17,9 +17,9 @@ colorama.init(autoreset=True)
 
 app = Flask(
     __name__,
-    static_folder = '',
+    static_folder = 'dist',
     static_url_path = '',
-    template_folder = ''
+    template_folder = 'dist'
 )
 api = Api(app)
 
@@ -70,6 +70,11 @@ class Beacons(Resource):
               grid_items.append(row)
 
         return grid_items
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 api.add_resource(Beacons, '/beacons', endpoint='beacons')
