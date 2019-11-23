@@ -11,6 +11,7 @@ from resources.box import Box
 from resources.column import Column
 from resources.row import Row
 from resources.slide import Slide
+from resources.beacons import Beacons
 from beacons_server import utils
 
 colorama.init(autoreset=True)
@@ -41,36 +42,6 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 #         return function_wrapper
 #     return wrapper
 
-class Beacons(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('until', default='', trim=True)
-    parser.add_argument('transform', type=bool, default=False)
-
-    def get(self):
-        args = Beacons.parser.parse_args()
-
-        db = utils.get_db()
-        db.SILENT = True
-        beacons = db.get_items_with_descendants('slide', until=args['until'])
-        db.SILENT = False
-
-        if not args['transform'] or args['transform'] == 'false':
-            return beacons
-
-        grid_items = []
-        nb_rows = 0
-
-        for slide in beacons:
-            nb_rows = max(nb_rows, len(slide['content']))
-            for index, row in enumerate(slide['content']):
-              row['position'] = index + 1
-              row['slideId'] = slide['id']
-              row['slidePosition'] = slide['position'] + 1
-              # row['slideCss'] = slide['css']
-              grid_items.append(row)
-
-        return grid_items
-
 
 @app.route('/')
 def index():
@@ -78,7 +49,6 @@ def index():
 
 
 api.add_resource(Beacons, '/beacons', endpoint='beacons')
-
 
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
 api.add_resource(Bookmark, '/bookmarks/<int:id>', endpoint='bookmark')
