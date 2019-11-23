@@ -24,9 +24,10 @@ class Bookmark(Resource):
 
 
     def get(self, id = None):
+        args = Bookmark.parser.parse_args()
         if id is None:
-            return utils.get_db().select('bookmark', orderBy='id')
-        item = utils.get_db().select('bookmark', unique=True, id=id)
+            return utils.get_db().select('bookmark', orderBy='id', args=args)
+        item = utils.get_db().select('bookmark', unique=True, args=args, id=id)
         self.abort_if_item_doesnt_exist(item)
         return item
 
