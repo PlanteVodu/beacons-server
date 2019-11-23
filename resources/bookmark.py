@@ -1,68 +1,12 @@
-from flask_restful import reqparse, abort, Resource
-from beacons_server import utils
+from resources.child_resource import ChildResource
 
-class Bookmark(Resource):
+class Bookmark(ChildResource):
 
-    parser = reqparse.RequestParser()
-    parser.add_argument('parent_id', type=int)
-    parser.add_argument('position', type=int)
-    parser.add_argument('name', trim=True)
-    parser.add_argument('url', trim=True)
-    parser.add_argument('icon', trim=True)
+    def __init__(self):
+        ChildResource.__init__(self)
 
-    full_parser = parser.copy()
-    full_parser.replace_argument('parent_id', type=int, required=True, help='Element must specify a parent_id')
-    full_parser.replace_argument('position', type=int, help='Element must specify a position')
-    full_parser.replace_argument('name', default='', trim=True)
-    full_parser.replace_argument('url', default='', trim=True)
-    full_parser.replace_argument('icon', default='', trim=True)
+        self.parser.add_argument('url', trim=True)
+        self.parser.add_argument('icon', trim=True)
 
-
-    def abort_if_item_doesnt_exist(self, item):
-        if item is None:
-            abort(404, message="Could not find the specified bookmark")
-
-
-    def get(self, id = None):
-        args = Bookmark.parser.parse_args()
-        if id is None:
-            return utils.get_db().select('bookmark', orderBy='id', args=args)
-        item = utils.get_db().select('bookmark', unique=True, args=args, id=id)
-        self.abort_if_item_doesnt_exist(item)
-        return item
-
-
-    def post(self):
-        db = utils.get_db()
-        args = Bookmark.full_parser.parse_args()
-        id = db.insert_object('bookmark', args)
-        return db.select('bookmark', unique=True, id=id), 201
-
-
-    def delete(self, id):
-        db = utils.get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        self.abort_if_item_doesnt_exist(item)
-        db.remove_item('bookmark', id)
-        return '', 204
-
-
-    def put(self, id):
-        db = utils.get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        args = Bookmark.full_parser.parse_args()
-        db.update_item('bookmark', id=id, args=args)
-        updated_item = db.select('bookmark', unique=True, id=id)
-        return updated_item, 200
-
-
-    def patch(self, id):
-        db = utils.get_db()
-        item = db.select('bookmark', unique=True, id=id)
-        self.abort_if_item_doesnt_exist(item)
-
-        args = Bookmark.parser.parse_args()
-        db.update_item('bookmark', id=id, args=args)
-
-        updated_item = db.select('bookmark', unique=True, id=id)
-        return updated_item, 201
+        self.full_parser.add_argument('url', default='', trim=True)
+        self.full_parser.add_argument('icon', default='', trim=True)
