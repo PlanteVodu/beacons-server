@@ -117,6 +117,9 @@ class DB:
             sql = 'INSERT INTO %s DEFAULT VALUES' % table
             values = ()
         else:
+            # Ignore SQL commands
+            obj = {k:v for k,v in obj.items() if k[0] != '_'}
+
             fields = '(%s)' % ','.join(obj.keys())
 
             values = ['?' for i in range(len(obj.keys()))]
@@ -124,6 +127,7 @@ class DB:
 
             sql = 'INSERT INTO %s %s VALUES %s' % (table, fields, values)
 
+        # Generate 'position' attribute if not set
         if 'position' in obj and obj['position'] is None:
             if 'parent_id' in obj and obj['parent_id'] != None:
                 position = len(self.select(table, parent_id=obj['parent_id']))
@@ -245,7 +249,7 @@ class DB:
             args = kwargs
         elif len(args) == 0:
             return
-        args = {k:v for k,v in args.items() if v != None}
+        args = {k:v for k,v in args.items() if k[0] != '_' and v != None}
         fields_values = ', '.join(self._format_fields_values(*args.keys()))
         data = tuple(args.values()) + (id,)
         sql = 'UPDATE %s SET %s WHERE id = ?' % (table, fields_values)
