@@ -36,7 +36,7 @@ def index():
 def last_bookmarks_locations():
     db = utils.get_db()
 
-    last_bookmarks = db.select('bookmark', _group_by='parent_id', _order_by='id', _desc=True, _limit=5)
+    last_bookmarks = db.select_sql('SELECT MAX(id), parent_id FROM bookmark GROUP BY parent_id ORDER BY id DESC LIMIT 5')
     boxes = [db.select('box', unique=True, id=bm['parent_id']) for bm in last_bookmarks]
 
     return jsonify(boxes)
