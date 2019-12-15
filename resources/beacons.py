@@ -24,7 +24,7 @@ class Beacons(Resource):
         for slide in beacons:
             nb_rows = max(nb_rows, len(slide['content']))
             for index, row in enumerate(slide['content']):
-              row['position'] = index + 1
+              row['position'] = row['position'] + 1
               row['slideId'] = slide['id']
               row['slidePosition'] = slide['position'] + 1
               # row['slideCss'] = slide['css']
