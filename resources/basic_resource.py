@@ -4,20 +4,29 @@ from beacons_server import utils
 class BasicResource(Resource):
 
     def __init__(self):
+        self.table = self.__class__.__name__.lower()
+        self.set_general_parser()
+        self.set_get_parser()
+        self.set_full_parser()
+
+
+    def set_general_parser(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('position', type=int)
         self.parser.add_argument('name', trim=True)
 
-        self.parser.add_argument('_group_by', trim=True)
-        self.parser.add_argument('_order_by', trim=True)
-        self.parser.add_argument('_asc', trim=bool)
-        self.parser.add_argument('_desc', trim=bool)
-        self.parser.add_argument('_limit', trim=True)
 
+    def set_get_parser(self):
+        self.get_parser = self.parser.copy()
+        self.get_parser.add_argument('_group_by', trim=True)
+        self.get_parser.add_argument('_order_by', trim=True)
+        self.get_parser.add_argument('_asc', trim=bool)
+        self.get_parser.add_argument('_desc', trim=bool)
+        self.get_parser.add_argument('_limit', trim=True)
+
+    def set_full_parser(self):
         self.full_parser = self.parser.copy()
         self.full_parser.replace_argument('name', default='', trim=True)
-
-        self.table = self.__class__.__name__.lower()
 
 
     def abort_if_item_doesnt_exist(self, item):
@@ -26,7 +35,7 @@ class BasicResource(Resource):
 
 
     def get(self, id = None):
-        args = self.parser.parse_args()
+        args = self.get_parser.parse_args()
 
         if id is None:
             return utils.get_db().select(self.table, orderBy='id', args=args)
