@@ -268,25 +268,34 @@ class DB:
         - move up (position-1) the old following items (from the old parent)
         - move down (position+1) the new following items (from the new
         parent)"""
+
+        if new_position is None:
+            return None
+
         item = self.select(table, unique = True, id = id)
+
         if item is None:
-            return
-        if 'parent_id' in item and parent_id != None and item['parent_id'] != parent_id:
+            return None
+
+        # Item's parent has changed ?
+        if parent_id != None and 'parent_id' in item and parent_id != item['parent_id']:
             # Update affected items from both old and new parents
             # Move up the old parent's items from old_position+1 to last
             self._reposition_items(table, direction='up', min_position=item['position']+1, parent_id=item['parent_id'])
             # Move down the new parent's items from new_position to last
-            self._reposition_items(table, direction='up', min_position=new_position, parent_id=parent_id)
+            self._reposition_items(table, direction='down', min_position=new_position, parent_id=parent_id)
 
             self.update_item(table, id, position=new_position)
-            self.update_item(table, id, parent=parent_id)
+            self.update_item(table, id, parent_id=parent_id)
         elif item['position'] != new_position:
-            if item['position'] < new_position: # move item up
+            if 'parent_id' in item:
+                parent_id = item['parent_id']
+            if item['position'] > new_position: # move item up
                 # Move down items from new_position to old_position-1
-                self._reposition_items(table, direction='down', min_position=new_position, max_position=item['position']-1)
+                self._reposition_items(table, direction='down', min_position=new_position, max_position=item['position']-1, parent_id=parent_id)
             else: # move item down
                 # Move up items from old_position+1 to new_position
-                self._reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position)
+                self._reposition_items(table, direction='up', min_position=item['position']+1, max_position=new_position, parent_id=parent_id)
 
             self.update_item(table, id, position=new_position)
 
