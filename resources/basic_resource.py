@@ -70,11 +70,18 @@ class BasicResource(Resource):
     def patch(self, id):
         db = utils.get_db()
 
-        item = db.select(self.table, unique=True, id=id)
-        self.abort_if_item_doesnt_exist(item)
-
         args = self.parser.parse_args()
-        db.update_item(self.table, id=id, args=args)
+
+        # Reposition item if needed
+        db.move_item(self.table, id=id, new_position=args.get('position'), parent_id=args.get('parent_id'))
+
+        # Update other item's attributes if any
+        positionnal_keys = ['position', 'parent_id']
+        args = {k:v for k,v in args.items() if k not in positionnal_keys and v != None}
+        if len(args) > 0:
+            db.update_item(self.table, id=id, args=args)
 
         updated_item = db.select(self.table, unique=True, id=id)
-        return updated_item, 201
+        if updated_item is None:
+            self.abort_if_item_doesnt_exist(updated_item)
+        return updated_item, 200
