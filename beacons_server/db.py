@@ -338,10 +338,7 @@ class DB:
     def get_items_with_descendants(self, table, parent_id = None, until = ''):
         """Return items with the specified parent along with all
         their descendants (childs, grand-childs, etc.)."""
-        if parent_id is None:
-            items = self.select(table, orderBy='position')
-        else:
-            items = self.select(table, orderBy='position', parent_id=parent_id)
+        items = self.select(table, _order_by='position', parent_id=parent_id)
 
         child_table = self._get_child_table(table)
         if until == table or child_table is None:
