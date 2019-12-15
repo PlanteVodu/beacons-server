@@ -214,3 +214,9 @@ class DBTest(unittest.TestCase):
         self.assertEqual(items[2]['position'], 3)
 
         self.assertEqual(self.db.select('bookmark', unique=True, parent_id=2)['position'], 1)
+
+
+    def test_get_child_table(self):
+        self.assertIsNone(self.db._get_child_table('bookmark'))
+        self.assertEqual(self.db._get_child_table('slide'), 'row')
+        self.assertEqual(self.db._get_child_table('box'), 'bookmark')

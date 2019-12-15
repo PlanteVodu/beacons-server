@@ -343,12 +343,21 @@ class DB:
         else:
             items = self.select(table, orderBy='position', parent_id=parent_id)
 
-        type_index = self.OBJ_TYPES.index(table)
-        if until == table or type_index == len(self.OBJ_TYPES) - 1:
+        child_table = self._get_child_table(table)
+        if until == table or child_table is None:
             return items
 
-        childs_table = self.OBJ_TYPES[type_index+1]
         for i, item in enumerate(items):
             items[i]['content'] = self.get_items_with_descendants(childs_table, item['id'], until=until)
 
         return items
+
+
+    def _get_child_table(self, table):
+        return self._get_table_by_index(self.OBJ_TYPES.index(table) + 1)
+
+
+    def _get_table_by_index(self, index):
+        if index < 0 or index >= len(self.OBJ_TYPES):
+            return None
+        return self.OBJ_TYPES[index]
