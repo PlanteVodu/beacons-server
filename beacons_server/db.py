@@ -246,10 +246,10 @@ class DB:
     def update_item(self, table, id, args = {}, **kwargs):
         """Update the specified item's fields with the given values."""
         if len(kwargs) > 0:
-            args = kwargs
-        elif len(args) == 0:
-            return
+            args = {**kwargs, **args}
         args = {k:v for k,v in args.items() if k[0] != '_' and v != None}
+        if len(args) == 0:
+            return
         fields_values = ', '.join(self._format_fields_values(*args.keys()))
         data = tuple(args.values()) + (id,)
         sql = 'UPDATE %s SET %s WHERE id = ?' % (table, fields_values)
