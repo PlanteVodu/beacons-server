@@ -42,6 +42,11 @@ def last_bookmarks_locations():
     return jsonify(boxes)
 
 
+@app.route('/beacons/lastmodification')
+def db_last_modification():
+    return jsonify(utils.get_db_last_modification())
+
+
 api.add_resource(Beacons, '/beacons', endpoint='beacons')
 
 api.add_resource(Bookmark, '/bookmarks', endpoint='bookmarks')
